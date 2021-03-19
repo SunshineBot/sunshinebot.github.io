@@ -27,176 +27,184 @@
 - Results
 
 ## VolcTrans
-- Overview: **Universal** methods for all translation model
-- Multi Models
-    - Transformer 15e6d(deeper transformer)
-    - Transformer Mid 25e6d/50e6d: ffn size 4096->3072, embedding size 1024->768
-    - Transformer 15000FFN: performance of the Transformer model is largely dependent on the dimensions of feed forward network. Dropout 0.1->0.3, rule dropout 0.1->0.3
-    - Transformer 128hdim/256hdim: increase attention head dimension
-    - DLCL 25layers: deep transformer + DLCL
-    - Dynamic Conv 7e6d
-    - Dynamic Conv 25e6d
-- Strategies
-    - unconstrained - which means trained with non-wmt20's monolingual data.
-    - Parallel Data Up-Sampling
-        - Reason: data diversity matters for the whole system.
-        - each model is trained with different part of parallel corpus.
-    - mRASP: universal pretrained model for low-resource languages.
-    - Tag BT
-        - Different models decode different parts of monolingual data(10M/part).
-    - Iterative Joint Training
-        - Iterative trained with BT data.
-    - KD & Ensemble
-        - Ensemble Model: devide 9 models into 3 groups, employ models in one group as teacher models.
-        - R2L Model: train one R2L model for each group(using the same data as any one model in last iteration).
-        - Use pseudo parallel data from Ensemble/R2L model to train the student model w/o parallel data.
-    - Others
-        - top-k checkpoint average(the same with ours).
-        - Random Ensemble: select candidates from top-k checkpoints instead of from best checkpoint.
-        - In domain finetuning: finetune the best single model with dev set for 1-2 epochs.
-- Procedures(for en-zh)
-    - preprocess and sampling
-        - ModesTokenizer/Jieba, BPE num_ops=32000.
-        - upsampling 100%/110%/120%.
-    - model training
-        - train 3 models(Mid 25e6d/Mid 50e6d/ Conv 25e6d) with 3 upsampled data, resulting in 9 baseline models.
-        - monolingual data: NewsCrawl for en, NewsCrawl/CCMT/LDC for zh.
-        - tag bt & iterative
-            - en: disjoint data for each baseline model(90M for 9 models).
-            - zh: use each part of data for 3 times(there're only 24M zh data).
-        - KD: employ disjoint monolingual data as distilling data.
-        - Final: ensemble 9 models.
-- Results
+### Overview: **Universal** methods for all translation model
+### Multi Models
+- Transformer 15e6d(deeper transformer)
+- Transformer Mid 25e6d/50e6d: ffn size 4096->3072, embedding size 1024->768
+- Transformer 15000FFN: performance of the Transformer model is largely dependent on the dimensions of feed forward network. Dropout 0.1->0.3, rule dropout 0.1->0.3
+- Transformer 128hdim/256hdim: increase attention head dimension
+- DLCL 25layers: deep transformer + DLCL
+- Dynamic Conv 7e6d
+- Dynamic Conv 25e6d
+### Strategies
+- unconstrained - which means trained with non-wmt20's monolingual data.
+- Parallel Data Up-Sampling
+    - Reason: data diversity matters for the whole system.
+    - each model is trained with different part of parallel corpus.
+- mRASP: universal pretrained model for low-resource languages.
+- Tag BT
+    - Different models decode different parts of monolingual data(10M/part).
+- Iterative Joint Training
+    - Iterative trained with BT data.
+- KD & Ensemble
+    - Ensemble Model: devide 9 models into 3 groups, employ models in one group as teacher models.
+    - R2L Model: train one R2L model for each group(using the same data as any one model in last iteration).
+    - Use pseudo parallel data from Ensemble/R2L model to train the student model w/o parallel data.
+- Others
+    - top-k checkpoint average(the same with ours).
+    - Random Ensemble: select candidates from top-k checkpoints instead of from best checkpoint.
+    - In domain finetuning: finetune the best single model with dev set for 1-2 epochs.
+### Procedures(for en-zh)
+- preprocess and sampling
+    - ModesTokenizer/Jieba, BPE num_ops=32000.
+    - upsampling 100%/110%/120%.
+- model training
+    - train 3 models(Mid 25e6d/Mid 50e6d/ Conv 25e6d) with 3 upsampled data, resulting in 9 baseline models.
+    - monolingual data: NewsCrawl for en, NewsCrawl/CCMT/LDC for zh.
+    - tag bt & iterative
+        - en: disjoint data for each baseline model(90M for 9 models).
+        - zh: use each part of data for 3 times(there're only 24M zh data).
+    - KD: employ disjoint monolingual data as distilling data.
+    - Final: ensemble 9 models.
+### Results
+
+
 ## WeChat
-- Overveiw: Push single model to best **in-domain performance**
-- Multi Models
-    - Deeper Transformer: 30e6d(base), 20/24e6d(big)
-    - Wider Transformer: 10e6d15000FFN, 12e6d12288FFN
-    - AAN: Average Attention Transformer
-    - DTMT: RNN-based NMT model(train very slowly)
-- Strategies
-    - Data filter: punctuation normalization, filter out long sentences/long words/duplicated sentences/word ratio
-    - Out-of-domain synthesis strategies - 2~4 BLEU promotion
-        - BT: on monolingual corpus with L2R & R2L model
-        - KD: on parallel corpus with L2R & R2L model
-    - In-domain synthesis strategies
-        - In-domain finetuning: finetune on WMT17/18 tests for 400 steps - 5~7 BLEU promotion
-        - Iterative In-domain Knowledge Transfer - 2~3 BLEU promotion
-            - finetune the out-of-domain model(with BT&KD) with in-domain finetuning strategy
-            - ensemble models and translate Chinese monolingual corpus into English to get pseudo in-domain parallel corpus
-            - retrain models with both pseudo in-domain parallel corpus and original out-of-domain parallel corpus
-            - procedures above can be conducted iteratively(0.1~0.4 BLEU for second iteration)
-        - Parallel Scheduleed Sampling
-            - first pass: generate predictions
-            - second pass: feed mixture of reference's and prediction's tokens
-        - Target Denoising: add noise to 30% sentences, in which replace a token with a random token from the sentence with  percentage of 15%(totally 4.5%)
-        - Minimum Risk Training instead of CrossEntropy loss
-    - Data Augmentation
-        - add token-level noise to source data: replace/delete/permutation(both proba=0.1) - Noisy Data
-        - replace beam search with sampling in generation - Sample Data
-        - original data - Clean Data
-    - Advanced Ensemble - 0.7 BLEU
-        - Data Shards: split training data into 3 shards among Clean/Noisy/Sample data respectively(totally 9 shards)
-        - problem: models are very similar(4 finetuning approaches over each model, totally 200+ models)
-        - Self BLEU: using candidates as references to get BLEU from each other, ensemble 20 models with low BLEU scores
-- Results
+### Overveiw: Push single model to best **in-domain performance**
+### Multi Models
+- Deeper Transformer: 30e6d(base), 20/24e6d(big)
+- Wider Transformer: 10e6d15000FFN, 12e6d12288FFN
+- AAN: Average Attention Transformer
+- DTMT: RNN-based NMT model(train very slowly)
+### Strategies
+- Data filter: punctuation normalization, filter out long sentences/long words/duplicated sentences/word ratio
+- Out-of-domain synthesis strategies - 2~4 BLEU promotion
+    - BT: on monolingual corpus with L2R & R2L model
+    - KD: on parallel corpus with L2R & R2L model
+- In-domain synthesis strategies
+    - In-domain finetuning: finetune on WMT17/18 tests for 400 steps - 5~7 BLEU promotion
+    - Iterative In-domain Knowledge Transfer - 2~3 BLEU promotion
+        - finetune the out-of-domain model(with BT&KD) with in-domain finetuning strategy
+        - ensemble models and translate Chinese monolingual corpus into English to get pseudo in-domain parallel corpus
+        - retrain models with both pseudo in-domain parallel corpus and original out-of-domain parallel corpus
+        - procedures above can be conducted iteratively(0.1~0.4 BLEU for second iteration)
+    - Parallel Scheduleed Sampling
+        - first pass: generate predictions
+        - second pass: feed mixture of reference's and prediction's tokens
+    - Target Denoising: add noise to 30% sentences, in which replace a token with a random token from the sentence with  percentage of 15%(totally 4.5%)
+    - Minimum Risk Training instead of CrossEntropy loss
+- Data Augmentation
+    - add token-level noise to source data: replace/delete/permutation(both proba=0.1) - Noisy Data
+    - replace beam search with sampling in generation - Sample Data
+    - original data - Clean Data
+- Advanced Ensemble - 0.7 BLEU
+    - Data Shards: split training data into 3 shards among Clean/Noisy/Sample data respectively(totally 9 shards)
+    - problem: models are very similar(4 finetuning approaches over each model, totally 200+ models)
+    - Self BLEU: using candidates as references to get BLEU from each other, ensemble 20 models with low BLEU scores
+### Results
+
+
 ## DiDi
-- Overview
-- Multi Models
-    - Transformer Big
-    - Transformer with Relative Attention
-    - Transformer 8192FFN/15000FFN(dropout: 0.1->0.3, label smoothing: ->0.2)
-    - Transformer with reversed source
-- Strategies
-    - Data filtering
-        - common: normalize punctuation/long sentences(>120)/long words(>40)/length ratio(1:3).
-        - others: HTML tags/Language detect(fastText)/fast-align/LM score.
-        - feed src and ref into BERT and CNN and filter sentences.
-    - BT
-        - decoding strategy: greedy/beam/sampling top-k/add noise(to input/beam output)
-            - obtain imporvements: add noise to input + beam search.
-            - delete/replace/swap tokens with the proba of 0.05.
-        - iterative joint training
-            - iteratively train t2s and s2t model to generate data for s2t and t2s model.
-        - train LM and split data in different domains
-            - train LM on different monolingual data(NewsCrawl, Gigaword, etc) and score both parallel and synthetic sentences.
-            - train different models on different shards of parallel and synthetic data.
-    - KD & Ensemble - 1.5 BLEU(together with BT)
-        - for each model, ensemble other models as teacher model.
-        - if teacher model perform worse than student model, skip KD.
-    - In-domain data selection and finetuning - 10 BLEU
-        - employ (sampled) parallel data as out-of-domain data, test data as in-domain data
-        - N-grams: train 2 LM and filter the parallel data.
-        - Binary Classification: finetune BERT classifier on the in-domain and out-of-domain data
-    - Ensemble - 0.4 BLEU
-        - method: combine the full probability distribution over the target vocab of different models at each step.
-            - log-avg achieves best performance among max/avg/log-avg strategies.
-            - greedy search instead of beam search due to limits of computer resources.
-        - different models are trained with different: random seeds/parameters/architectures/training data.
-    - Domain Style Translation - 1 BLEU
-        - translations differs in different domains:
-            - at least data can be devide into 2 domains: native style and translation style
-        - procedures
-            - use pretrained BERT and k-means to get 2 clusters(2 domains)
-            - finetune BERT on data of 2 domains above
-            - in predicting, multiply the output with the domain probability.
-    - Re-ranking - 0.5 BLEU
-        - k-best MIRA
-        - features: Length Feature(between src and hyp)/NMT Feature(score of NMT)/LM Features(scores of LM)
-- Results
+### Overview
+### Multi Models
+- Transformer Big
+- Transformer with Relative Attention
+- Transformer 8192FFN/15000FFN(dropout: 0.1->0.3, label smoothing: ->0.2)
+- Transformer with reversed source
+### Strategies
+- Data filtering
+    - common: normalize punctuation/long sentences(>120)/long words(>40)/length ratio(1:3).
+    - others: HTML tags/Language detect(fastText)/fast-align/LM score.
+    - feed src and ref into BERT and CNN and filter sentences.
+- BT
+    - decoding strategy: greedy/beam/sampling top-k/add noise(to input/beam output)
+        - obtain imporvements: add noise to input + beam search.
+        - delete/replace/swap tokens with the proba of 0.05.
+    - iterative joint training
+        - iteratively train t2s and s2t model to generate data for s2t and t2s model.
+    - train LM and split data in different domains
+        - train LM on different monolingual data(NewsCrawl, Gigaword, etc) and score both parallel and synthetic sentences.
+        - train different models on different shards of parallel and synthetic data.
+- KD & Ensemble - 1.5 BLEU(together with BT)
+    - for each model, ensemble other models as teacher model.
+    - if teacher model perform worse than student model, skip KD.
+- In-domain data selection and finetuning - 10 BLEU
+    - employ (sampled) parallel data as out-of-domain data, test data as in-domain data
+    - N-grams: train 2 LM and filter the parallel data.
+    - Binary Classification: finetune BERT classifier on the in-domain and out-of-domain data
+- Ensemble - 0.4 BLEU
+    - method: combine the full probability distribution over the target vocab of different models at each step.
+        - log-avg achieves best performance among max/avg/log-avg strategies.
+        - greedy search instead of beam search due to limits of computer resources.
+    - different models are trained with different: random seeds/parameters/architectures/training data.
+- Domain Style Translation - 1 BLEU
+    - translations differs in different domains:
+        - at least data can be devide into 2 domains: native style and translation style
+    - procedures
+        - use pretrained BERT and k-means to get 2 clusters(2 domains)
+        - finetune BERT on data of 2 domains above
+        - in predicting, multiply the output with the domain probability.
+- Re-ranking - 0.5 BLEU
+    - k-best MIRA
+    - features: Length Feature(between src and hyp)/NMT Feature(score of NMT)/LM Features(scores of LM)
+### Results
+
+
 ## Tencent
-- Overview: **BEST** zh-en Baselines
-- Multi Models(both use pre-norm)
-    - Deep Transformer: 40e(base)
-    - Hybrid Transformer: 35 self-attention encoder + 5 ON-LSTM encoder
-    - BigDeep Transformer: 20e(big)
-    - Large Transformer: 8192FFN based on BigDeep Transformer
-- Strategies
-    - Data filter: langid/deplication/length(>150, 1:1.3)/invalid string/edit distance
-    - Data Augmentation
-        - BT: **Only in English-German** due to lower translation quality in English-Chinese
-            - ensemble of 2 models
-            - add noise to source
-            - add special tag at the head of synthetic source
-            - filter out examples with BLEU <30
-        - R2L training: translate source sentences with both L2R and R2L, filter out BLEU<15
-    - Finetuning
-        - Generally: use WMT2017dev/WMT2017test/WMT2018test as in-domain corpus, finetune with small batch size for several thousands of steps
-        - for zh-en: addtional WMT2019test, using R2L model(boost), batch size 2048, train 3k steps
-        - for en-zh: reset optimizer, learning rate 8e-5, batch size 1024, train 900 steps
-    - re-ranking
-        - source-to-target model: ensemble 4 models with beam size of 25
-        - target-to-source model: translate candidates back to source, using big transformer
-        - LM: train a small GPT-2(FFN8192) on target monolingual data.
-        - length penalty: random search in range [0, 3)
-    - Ensemble
-        - Greedy based ensemble: get 4 best single models, add other model which can benefit the translation performance
-        - Iterative Transductive Ensemble: translate ensembly def/test set to get pesudo data and finetune model on it, iteratively
-- Results
+### Overview: **BEST** zh-en Baselines
+### Multi Models(both use pre-norm)
+- Deep Transformer: 40e(base)
+- Hybrid Transformer: 35 self-attention encoder + 5 ON-LSTM encoder
+- BigDeep Transformer: 20e(big)
+- Large Transformer: 8192FFN based on BigDeep Transformer
+### Strategies
+- Data filter: langid/deplication/length(>150, 1:1.3)/invalid string/edit distance
+- Data Augmentation
+    - BT: **Only in English-German** due to lower translation quality in English-Chinese
+        - ensemble of 2 models
+        - add noise to source
+        - add special tag at the head of synthetic source
+        - filter out examples with BLEU <30
+    - R2L training: translate source sentences with both L2R and R2L, filter out BLEU<15
+- Finetuning
+    - Generally: use WMT2017dev/WMT2017test/WMT2018test as in-domain corpus, finetune with small batch size for several thousands of steps
+    - for zh-en: addtional WMT2019test, using R2L model(boost), batch size 2048, train 3k steps
+    - for en-zh: reset optimizer, learning rate 8e-5, batch size 1024, train 900 steps
+- re-ranking
+    - source-to-target model: ensemble 4 models with beam size of 25
+    - target-to-source model: translate candidates back to source, using big transformer
+    - LM: train a small GPT-2(FFN8192) on target monolingual data.
+    - length penalty: random search in range [0, 3)
+- Ensemble
+    - Greedy based ensemble: get 4 best single models, add other model which can benefit the translation performance
+    - Iterative Transductive Ensemble: translate ensembly def/test set to get pesudo data and finetune model on it, iteratively
+### Results
+
+
 ## OPPO
-- Overview
-- Model: Transformer Big
-- Strategies
-    - Data filter
-        - common: html tags/spaces/punctuations/long sentences/long words/length ratio/fastalign
-        - special: charactar-word count ratio >1.5<12
-    - Data preprocess
-        - Convert Traditional Chinese to Simplified Chinese
-        - Convert Latin letters/digit chars/punctuations, some to full width and others to half width.
-        - Chinese tokenizer: pkuseg
-    - BT: Iterative BT
-    - Finetune:
-        - finetune on parallel data after BT
-        - finetune on newstest2017
-    - Ensemble
-    - Re-ranking
-        - forward scorer(source-to-target)
-        - backward scorer(target-to-source)
-        - LM socrer(LM)
-    - Entity substitution
-        - get entity mapping with Standford NLP NER tools
-        - replace the entity with <tag1>, <tag2>, etc and recover it with post-edit.
-- Results
+### Overview
+### Model: Transformer Big
+### Strategies
+- Data filter
+    - common: html tags/spaces/punctuations/long sentences/long words/length ratio/fastalign
+    - special: charactar-word count ratio >1.5<12
+- Data preprocess
+    - Convert Traditional Chinese to Simplified Chinese
+    - Convert Latin letters/digit chars/punctuations, some to full width and others to half width.
+    - Chinese tokenizer: pkuseg
+- BT: Iterative BT
+- Finetune:
+    - finetune on parallel data after BT
+    - finetune on newstest2017
+- Ensemble
+- Re-ranking
+    - forward scorer(source-to-target)
+    - backward scorer(target-to-source)
+    - LM socrer(LM)
+- Entity substitution
+    - get entity mapping with Standford NLP NER tools
+    - replace the entity with <tag1>, <tag2>, etc and recover it with post-edit.
+### Results
 
 ## Summary
 - BT: promote data diversity
