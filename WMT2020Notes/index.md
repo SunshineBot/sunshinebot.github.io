@@ -17,6 +17,7 @@
     - WMT19以前，source和reference中是混合了双向语料的，即对于en->zh而言，测试集的reference包含了原始的英文，也包含了经由中文翻译得到的英文，source同理，这会给评价指标引入偏差，尤其是BLEU
     - WMT19开始，测试集中source端都是原始的句子，reference是人工撰写的翻译
 
+
 ## Findings - 人工评价
 - DA(Direct Assessment)
     - 给定source和reference，对candidate进行打分，分数在0~100之间
@@ -26,8 +27,11 @@
     - +DC表示评价时提供句子所在的完整的文章，-DC表示只提供单个的句子用于打分
 - Results
 
+
 ## VolcTrans
+
 ### Overview: **Universal** methods for all translation model
+
 ### Multi Models
 - Transformer 15e6d(deeper transformer)
 - Transformer Mid 25e6d/50e6d: ffn size 4096->3072, embedding size 1024->768
@@ -36,6 +40,7 @@
 - DLCL 25layers: deep transformer + DLCL
 - Dynamic Conv 7e6d
 - Dynamic Conv 25e6d
+
 ### Strategies
 - unconstrained - which means trained with non-wmt20's monolingual data.
 - Parallel Data Up-Sampling
@@ -54,6 +59,7 @@
     - top-k checkpoint average(the same with ours).
     - Random Ensemble: select candidates from top-k checkpoints instead of from best checkpoint.
     - In domain finetuning: finetune the best single model with dev set for 1-2 epochs.
+
 ### Procedures(for en-zh)
 - preprocess and sampling
     - ModesTokenizer/Jieba, BPE num_ops=32000.
@@ -66,16 +72,20 @@
         - zh: use each part of data for 3 times(there're only 24M zh data).
     - KD: employ disjoint monolingual data as distilling data.
     - Final: ensemble 9 models.
+
 ### Results
 
 
 ## WeChat
+
 ### Overveiw: Push single model to best **in-domain performance**
+
 ### Multi Models
 - Deeper Transformer: 30e6d(base), 20/24e6d(big)
 - Wider Transformer: 10e6d15000FFN, 12e6d12288FFN
 - AAN: Average Attention Transformer
 - DTMT: RNN-based NMT model(train very slowly)
+
 ### Strategies
 - Data filter: punctuation normalization, filter out long sentences/long words/duplicated sentences/word ratio
 - Out-of-domain synthesis strategies - 2~4 BLEU promotion
@@ -101,16 +111,20 @@
     - Data Shards: split training data into 3 shards among Clean/Noisy/Sample data respectively(totally 9 shards)
     - problem: models are very similar(4 finetuning approaches over each model, totally 200+ models)
     - Self BLEU: using candidates as references to get BLEU from each other, ensemble 20 models with low BLEU scores
+
 ### Results
 
 
 ## DiDi
+
 ### Overview
+
 ### Multi Models
 - Transformer Big
 - Transformer with Relative Attention
 - Transformer 8192FFN/15000FFN(dropout: 0.1->0.3, label smoothing: ->0.2)
 - Transformer with reversed source
+
 ### Strategies
 - Data filtering
     - common: normalize punctuation/long sentences(>120)/long words(>40)/length ratio(1:3).
@@ -147,16 +161,20 @@
 - Re-ranking - 0.5 BLEU
     - k-best MIRA
     - features: Length Feature(between src and hyp)/NMT Feature(score of NMT)/LM Features(scores of LM)
+
 ### Results
 
 
 ## Tencent
+
 ### Overview: **BEST** zh-en Baselines
+
 ### Multi Models(both use pre-norm)
 - Deep Transformer: 40e(base)
 - Hybrid Transformer: 35 self-attention encoder + 5 ON-LSTM encoder
 - BigDeep Transformer: 20e(big)
 - Large Transformer: 8192FFN based on BigDeep Transformer
+
 ### Strategies
 - Data filter: langid/deplication/length(>150, 1:1.3)/invalid string/edit distance
 - Data Augmentation
@@ -178,12 +196,15 @@
 - Ensemble
     - Greedy based ensemble: get 4 best single models, add other model which can benefit the translation performance
     - Iterative Transductive Ensemble: translate ensembly def/test set to get pesudo data and finetune model on it, iteratively
+
 ### Results
 
-
 ## OPPO
+
 ### Overview
+
 ### Model: Transformer Big
+
 ### Strategies
 - Data filter
     - common: html tags/spaces/punctuations/long sentences/long words/length ratio/fastalign
@@ -204,10 +225,12 @@
 - Entity substitution
     - get entity mapping with Standford NLP NER tools
     - replace the entity with <tag1>, <tag2>, etc and recover it with post-edit.
+
 ### Results
 
 ## Summary
 - BT: promote data diversity
     - split data into different shards
+
 
 Back to [Index](../index).
