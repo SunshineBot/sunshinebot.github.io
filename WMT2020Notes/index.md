@@ -40,13 +40,13 @@ WMT的想法是，现有的翻译模型和评价指标(BLEU)在面对Native->Tra
 
 |Ave.|Ave. z|System|
 |---|---|---|
-|77.5|0.102|VolcTrans|
-|77.6|0.089|DiDi-NLP|
-|77.4|0.077|WeChat-AI|
-|76.7|0.063|Tencent-Translation|
+|77.5|0.102|**VolcTrans**|
+|77.6|0.089|**DiDi-NLP**|
+|77.4|0.077|**WeChat-AI**|
+|76.7|0.063|**Tencent-Translation**|
 |77.8|0.060|Online-B|
 |78.0|0.051|DeepMind|
-|77.5|0.051|OPPO|
+|77.5|0.051|**OPPO**|
 |76.5|0.028|THUNLP|
 |76.0|0.016|SJTU-NICT|
 |72.4|0.000|Huawei-TSC|
@@ -64,12 +64,12 @@ WMT的想法是，现有的翻译模型和评价指标(BLEU)在面对Native->Tra
 |---|---|---|
 |80.6|0.568|HUMAN-B|
 |82.5|0.529|HUMAN-A|
-|80.0|0.447|OPPO|
-|79.0|0.420|Tencent-Translation|
+|80.0|0.447|**OPPO**|
+|79.0|0.420|**Tencent-Translation**|
 |77.3|0.415|Huawei-TSC|
 |77.4|0.404|NiuTrans|
 |77.7|0.387|SJTU-NICT|
-|76.6|0.373|VolcTrans|
+|76.6|0.373|**VolcTrans**|
 |73.7|0.282|Online-B|
 |73.0|0.241|Online-A|
 |69.5|0.136|dong-nmt|
