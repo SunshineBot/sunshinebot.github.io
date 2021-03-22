@@ -3,8 +3,10 @@
 本文主要关注WMT2020 News赛道的英中双向翻译，依据人工评价结果选择了火山、微信、滴滴、腾讯、OPPO5篇论文精读，同时粗略读了Findings并选择了一些感兴趣的内容整理出来。
 
 ## Data
+WMT语料包括平行语料和单语语料，对于中英翻译而言，规模较大的是UNPC和CWMT，分别为1600w和近1000w样本，其它语料规模较小（除了WMT2020新增的Back-Translated News，它只能算作伪平行语料）。Wiki Titles是一些词和短语。
 
-WMT2020相比于之前的比赛，语料变化比较多，更新了2个规模不大的语料，新增了2个语料，其中Back-Translated News规模大但是是BT语料。单语语料更新了News Crawl和News Commentary
+WMT2020相比于之前的比赛，语料变化比较多，更新了2个规模不大的语料，新增了2个语料，其中Back-Translated News规模大但是是BT语料。单语语料更新了News Crawl和News Commentary。
+constrained system只能使用提供的平行语料和单语语料，unconstrained system可以使用额外的语料。我们选取的5篇论文中，只有火山是unconstrained system，使用了额外的单语语料用于BT、KD等，其它4篇论文均为constrained system。
 
 - Parallel
     - [Updated]News Commentary v15
@@ -20,7 +22,7 @@ WMT2020相比于之前的比赛，语料变化比较多，更新了2个规模不
 
 数据上比较有趣的一点是，WMT19以前，source和reference中是混合了双向语料的，即对于en->zh而言，测试集的reference包含了原始的英文，也包含了经由中文翻译得到的英文，source同理。常规情况下我们并不对平行语料进行区分，都视为原始的平行语料。但是显而易见的是，直接写的句子和翻译得到的句子差异是非常大的（这一点读过翻译的国外书籍的人我相信都能体会到）。
 
-业界对这个问题似乎没有过多地关注，从WMT2019开始，平行语料进行了区分（即平行语料的两边并不是完全平等的），分为Native/Original sentences和Translated sentences。Native sentences是直接使用Native Language撰写出来的句子，Translated sentences是人工将Native sentences从Native(Source) Language翻译到到Target Language而得到的句子。
+业界对这个问题似乎没有过多地关注，但从WMT2019开始，平行语料进行了区分（即平行语料的两边并不是完全平等的），分为Native/Original sentences和Translated sentences。Native sentences是直接使用Native Language撰写出来的句子，Translated sentences是人工将Native sentences从Native(Source) Language翻译到到Target Language而得到的句子。
 
 WMT的想法是，现有的翻译模型和评价指标(BLEU)在面对Native->Translated构成的测试集和Translated->Native构成的测试集时表现存在偏差，且差异较大。既然是机器翻译，那么目标还是达到人工翻译的水平，因此从WMT2019开始，会将en->zh和zh->en的测试集分开来，保证**每一个**语种方向的测试集都只包含Native->Translated样本。
 
