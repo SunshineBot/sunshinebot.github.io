@@ -37,6 +37,7 @@ WMT的想法是，现有的翻译模型和评价指标(BLEU)在面对Native->Tra
 人工评价结果：
 
 **Chinese to English:**
+
 |Ave.|Ave. z|System|
 |---|---|---|
 |77.5|0.102|VolcTrans|
@@ -58,6 +59,7 @@ WMT的想法是，现有的翻译模型和评价指标(BLEU)在面对Native->Tra
 |67.3|-0.333|WMTBiomedBaseline|
 
 **English to Chinese:**
+
 |Ave.|Ave. z|System|
 |---|---|---|
 |80.6|0.568|HUMAN-B|
