@@ -26,14 +26,52 @@ WMT的想法是，现有的翻译模型和评价指标(BLEU)在面对Native->Tra
 
 
 ## Findings - 人工评价
-- DA(Direct Assessment)
-    - 给定source和reference，对candidate进行打分，分数在0~100之间
-- Source and Reference-based
-    - 只给定source，对candidate打分，这样可以对reference也进行打分，评估机器和人工翻译的水平
-- Document Context
-    - +DC表示评价时提供句子所在的完整的文章，-DC表示只提供单个的句子用于打分
-- Results
 
+人工评价离不开直接打分，这种方式被称为DA(Direc Assessment)，早期的DA是给定source和reference，对每一个candidate进行打分，分数在0~100之间，这样的方法被称为Reference-based DA。后来的方法改进为Source-based DA，不依赖reference，只给定source，对每一个candidate进行打分，好处是可以对reference进行打分，用于对比模型和人工翻译的质量。
+打分时还会考虑到上下文(Document Context, DC)的含义，+DC表示评估人员在打分时可以看到source句子所在的段落或文章，-DC表示仅提供source句子。
+
+最终的打分方式为Source-based DA +DC(Segment Ranking + DC, SR+DC)和Source-based DA -DC(Segment Ranking -DC, SR-DC)结合，然后将每个人的打分的分数按照评价者给分的均值和标准差进行标准化(Ave. z)，作为最终的分数进行排名。同时也提供了未经标准化的分数(Ave.)。
+
+人工评价结果：
+
+**Chinese to English:**
+|Ave.|Ave. z|System|
+|---|---|---|
+|77.5|0.102|VolcTrans|
+|77.6|0.089|DiDi-NLP|
+|77.4|0.077|WeChat-AI|
+|76.7|0.063|Tencent-Translation|
+|77.8|0.060|Online-B|
+|78.0|0.051|DeepMind|
+|77.5|0.051|OPPO|
+|76.5|0.028|THUNLP|
+|76.0|0.016|SJTU-NICT|
+|72.4|0.000|Huawei-TSC|
+|76.1|-0.017|Online-A|
+|74.8|-0.029|HUMAN|
+|71.7|-0.071|Online-G|
+|74.7|-0.078|dong-nmt|
+|72.2|-0.106|zlabs-nlp|
+|72.6|-0.135|Online-Z|
+|67.3|-0.333|WMTBiomedBaseline|
+
+**English to Chinese:**
+|Ave.|Ave. z|System|
+|---|---|---|
+|80.6|0.568|HUMAN-B|
+|82.5|0.529|HUMAN-A|
+|80.0|0.447|OPPO|
+|79.0|0.420|Tencent-Translation|
+|77.3|0.415|Huawei-TSC|
+|77.4|0.404|NiuTrans|
+|77.7|0.387|SJTU-NICT|
+|76.6|0.373|VolcTrans|
+|73.7|0.282|Online-B|
+|73.0|0.241|Online-A|
+|69.5|0.136|dong-nmt|
+|68.5|0.135|Online-Z|
+|70.1|0.122|Online-G|
+|68.7|0.082|zlabs-nlp|
 
 ## VolcTrans
 
