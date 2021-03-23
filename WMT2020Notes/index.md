@@ -227,8 +227,8 @@ VolcTrans最终的submission还加入了WMT19）。
 ### Overveiw: Push single model to best **in-domain performance**
 
 ![Architecture](./wechat-overview.png)
-
-
+  
+  
 
 |SETTINGS|DEEPER|WIDER|AVEATT|DTMT|
 |---|---|---|---|---|
