@@ -100,7 +100,7 @@ WMT的想法是，现有的翻译模型和评价指标(BLEU)在面对Native->Tra
 
 尽管CNN和RNN-based模型也有使用，但是效果相比transformer模型有差距，但是不同的模型结构对于Ensemble是有益处的，这点在VolcTrans(使用了CNN)和WeChat(使用了RNN)都有提及。
 VolcTrans原话大致是不在乎单个模型效果的好坏，更关注模型之间的差异。
-微信尝试了很多finetune策略，每一个finetune后的模型都作为single model参与Ensemble，最终发现来自类Transformer模型（含deep、wide等）的翻译结果更相似，不利于Ensemble。
+微信尝试了很多finetune策略，每一个finetune后的模型都作为single model参与Ensemble，最终发现来自类Transformer模型（含deep、wide等）的翻译结果更相似，不利于Ensemble，进而提出了self-BLEU的方法用来挑选多样性较大的模型用于Ensemble。
 
 ### Data Preprocess
 
