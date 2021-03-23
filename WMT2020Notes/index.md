@@ -29,7 +29,7 @@ WMT的想法是，现有的翻译模型和评价指标(BLEU)在面对Native->Tra
 
 ## Findings - 人工评价
 
-人工评价离不开直接打分，这种方式被称为DA(Direc Assessment)，早期的DA是给定source和reference，对每一个candidate进行打分，分数在0~100之间，这样的方法被称为Reference-based DA。WMT19曾在en-cz尝试过改进后的Source-based DA，不依赖reference，只给定source，对每一个candidate进行打分，好处是可以对reference进行打分，用于对比模型和人工翻译的质量。在WMT2020中，所有的out-of-English翻译均使用Source-based DA，所有的into-English翻译均使用reference-based DA(因为非英语语种为native language并且英语很熟练的人较多，反之较少)。
+人工评价离不开直接打分，这种方式被称为DA(Direct Assessment)，早期的DA是给定source和reference，对每一个candidate进行打分，分数在0~100之间，这样的方法被称为Reference-based DA。WMT19曾在en-cz尝试过改进后的Source-based DA，不依赖reference，只给定source，对每一个candidate进行打分，好处是可以对reference进行打分，用于对比模型和人工翻译的质量。在WMT2020中，所有的out-of-English翻译均使用Source-based DA，所有的into-English翻译均使用reference-based DA(因为非英语语种为native language并且英语很熟练的人较多，反之较少)。
 打分时还会考虑到上下文(Document Context, DC)的含义，+DC表示评估人员在打分时可以看到source句子所在的段落或文章，-DC表示仅提供source句子。
 
 对于Chinese <-> English，最终的打分方式为SR+DC(Segment Ranking DA + DC)，然后将每个人的打分的分数按照评价者给分的均值和标准差进行标准化(Ave. z)，作为最终的分数进行排名。同时也提供了未经标准化的分数(Ave.)。
