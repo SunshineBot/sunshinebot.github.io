@@ -274,12 +274,18 @@ VolcTrans最终的submission还加入了WMT19）。
     - problem: models are very similar(4 finetuning approaches over each model, totally 200+ models)
     - Self BLEU: using candidates as references to get BLEU from each other, ensemble 20 models with low BLEU scores
 
-### Results
-
-
 ## DiDi
 
 ### Overview
+
+| |Transformer Big|Transformer with relative position attention|Transformer with larger FFN size|Transformer with reversed source|
+|---|---|---|---|---|
+|baseline|26.01|26.23|26.12|26.08|
+|+ data augmentation|27.02|27.03|27.13|26.69|
+|+ In-domain data finetuning|29.33|29.49|29.62|29.18|
+|+ model ensemble|29.72|
+|+ domain style weighted|31.77|
+|+ reranking|31.86|
 
 ### Multi Models
 - Transformer Big
