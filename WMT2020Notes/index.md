@@ -228,6 +228,8 @@ VolcTrans最终的submission还加入了WMT19）。
 
 ![Architecture](./wechat-overview.png)
 
+
+
 |SETTINGS|DEEPER|WIDER|AVEATT|DTMT|
 |---|---|---|---|---|
 |Baseline|26.24|26.35|26.17|26.08|
