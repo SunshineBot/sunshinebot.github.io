@@ -130,7 +130,7 @@ VolcTrans没有提到过滤具体的过滤策略，其它都有提及。比较�
 第一是对原始训练数据引入多样性，一般来说是采样（VolcTrans，对全量数据进行放回采样，比例为100%、110%、120%）或者分片（微信，分成3部分）；第二是对BT使用的单语数据进行引入多样性，通常可以直接分片，然后用于生成BT数据（VolcTrans）或者训练LM等无监督模型（DiDi）；
 第三是对训练数据引入噪声，例如对source端数据进行增删改（微信）、在BT模型生成source数据时使用采样代替beam search（微信）
 
-### Procedures
+### Training Strategies
 
 常规的训练步骤可以分为以下几步：
 1. data preprocess/filter/sharding
@@ -152,7 +152,22 @@ BT和KD作为简单有效的做法， 已经得到公认（除了Tencent，他�
 
 #### Out-of-domain methods
 
-Out-of-domain
+Out-of-domain的方法在这里指不使用in-domain数据的数据增强方法，主要包括BT和KD。
+
+对于BT而言，最基本的使用方法是训练Back Translation模型，然后基于target端的单语数据，生成source端的翻译结果，构成伪平行语料，与原始平行语料合并训练翻译模型，从而提升翻译模型质量。
+论文中对BT做了不同的改进，比较常见的思路是iterative BT。我们可以将需要的翻译方向定义为source-to-target(s2t) model，则BT模型为target-to-source(t2s) model，这两者是互相对称的。因此可以先训练s2t和t2s，作为2个BT模型分别生成target和source数据，再训练t2s和s2t模型，提升单模型性能，然后再迭代生成数据、训练模型，直到没有显著受益为止。
+
+除此之外，还可以引入数据多样性(data diversity)，例如对单语语料进行分片，生成不同的数据用于训练多个模型，在迭代过程中加入KD和Ensemble甚至R2L、reranking等，用于提升单模型质量。
+还可以在生成数据的过程中对source端数据引入多样性，例如加入噪声等。这里可以分为2种，一种是在beam search阶段引入噪声，一种是在decoding阶段对decoder的input引入噪声。Tencent还在BT样本前加入了特殊的TAG，表明这是伪语料（不排除这是他们BT在中英上效果不好的原因）。
+
+#### In-domain methods
+
+In-domain方法指使用in-domain数据来提升单模型质量。In-domain数据在这里一般指WMT17和WMT18的测试集（OPPO只使用了WMT17，Tencent加入了WMT17dev，
+VolcTrans最终的submission还加入了WMT19）。
+
+对于in-domain的数据使用方法主要有3个。第一是直接finetune(OPPO, Tencent, VolcTrans)；第二是将finetune和iterative joint training结合起来(WeChat)；
+第三是使用in-domain数据训练LM和分类器，对原始的平行语料进行分类，然后使用与in-domain相近的平行语料finetune模型。
+
 ## VolcTrans
 
 ### Overview: **Universal** methods for all translation model
