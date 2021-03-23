@@ -242,6 +242,7 @@ VolcTrans最终的submission还加入了WMT19）。
 |&nbsp;&nbsp;&nbsp;+ Advanced Finetune|39.08|39.12|38.93|38.66|
 |+ Normal Ensemble|39.19| | | |
 |+ Advanced Ensemble|39.89| | | |
+
 ### Multi Models
 - Deeper Transformer: 30e6d(base), 20/24e6d(big)
 - Wider Transformer: 10e6d15000FFN, 12e6d12288FFN
