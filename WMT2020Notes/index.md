@@ -29,12 +29,12 @@ WMT的想法是，现有的翻译模型和评价指标(BLEU)在面对Native->Tra
 
 ## Findings - 人工评价
 
-人工评价离不开直接打分，这种方式被称为DA(Direc Assessment)，早期的DA是给定source和reference，对每一个candidate进行打分，分数在0~100之间，这样的方法被称为Reference-based DA。后来的方法改进为Source-based DA，不依赖reference，只给定source，对每一个candidate进行打分，好处是可以对reference进行打分，用于对比模型和人工翻译的质量。
+人工评价离不开直接打分，这种方式被称为DA(Direc Assessment)，早期的DA是给定source和reference，对每一个candidate进行打分，分数在0~100之间，这样的方法被称为Reference-based DA。WMT19曾在en-cz尝试过改进后的Source-based DA，不依赖reference，只给定source，对每一个candidate进行打分，好处是可以对reference进行打分，用于对比模型和人工翻译的质量。在WMT2020中，所有的out-of-English翻译均使用Source-based DA，所有的into-English翻译均使用reference-based DA(因为非英语语种为native language并且英语很熟练的人较多，反之较少)。
 打分时还会考虑到上下文(Document Context, DC)的含义，+DC表示评估人员在打分时可以看到source句子所在的段落或文章，-DC表示仅提供source句子。
 
-最终的打分方式为Source-based DA +DC(Segment Ranking + DC, SR+DC)和Source-based DA -DC(Segment Ranking -DC, SR-DC)结合，然后将每个人的打分的分数按照评价者给分的均值和标准差进行标准化(Ave. z)，作为最终的分数进行排名。同时也提供了未经标准化的分数(Ave.)。
+对于Chinese <-> English，最终的打分方式为SR+DC(Segment Ranking DA + DC)，然后将每个人的打分的分数按照评价者给分的均值和标准差进行标准化(Ave. z)，作为最终的分数进行排名。同时也提供了未经标准化的分数(Ave.)。
 
-人工评价结果：
+人工评价结果如下，其中Online-X表示选取的在线翻译服务的结果。
 
 **Chinese to English:**
 
@@ -77,6 +77,82 @@ WMT的想法是，现有的翻译模型和评价指标(BLEU)在面对Native->Tra
 |70.1|0.122|Online-G|
 |68.7|0.082|zlabs-nlp|
 
+
+## General Methods
+
+### Multiple Models
+
+所有论文均以Transformer Big为主要模型，几乎都使用了多种模型来做Ensemble(除了OPPO，他们只使用了Transformer Big)。其中使用较多的有：
+
+- Wide Transformer(4/4): 增加FFN size，一般为8192或15000，同时调大Dropout（一般0.3, rule dropout不一定）
+- Deep Transformer(3/4): 增加了Encoder的层数，15~50层不等，太深的模型一般会将hidden size和ffn size调小或者使用base模型
+
+其它用到的一些模型：
+
+- transformer 128hdim/256hdim(VolcTrans): 增加了Multi-head Attention中单个Head的维度
+- DLCL 25layers(VolcTrans): 小牛翻译在WMT19提出的模型的改进版
+- Dynamic Conv 7e6d/25e6d(VolcTrans): 卷积网络
+- Average Attention Transformer(WeChat): 将Decoder中的self-attention替换为对embedding的Average操作，略微降低效果的情况下加快推断
+- DTMT(WeChat): RNN-based NMT Model
+- Transformer With Relative Attention(DiDi)
+- Transformer with reversed source(DiDi)
+- Hybrid Transformer(Tencent): 35 self-attention encoder + 5 ON-LSTM encoder
+
+尽管CNN和RNN-based模型也有使用，但是效果相比transformer模型有差距，但是不同的模型结构对于Ensemble是有益处的，这点在VolcTrans(使用了CNN)和WeChat(使用了RNN)都有提及。
+VolcTrans原话大致是不在乎单个模型效果的好坏，更关注模型之间的差异。
+微信尝试了很多finetune策略，每一个finetune后的模型都作为single model参与Ensemble，最终发现来自类Transformer模型（含deep、wide等）的翻译结果更相似，不利于Ensemble。
+
+### Data Preprocess
+
+#### Data Preprocess
+
+预处理流程上，BPE和truecase基本成为标配。
+英文tokenizer均使用了Moses，中文分词各家不同，VolcTrans和Tencent使用了jieba，OPPO使用了pkuseg，WeChat、DiDi都使用了自研的分词工具。
+其它预处理包括全半角转换、Unicode字符转换、HTML tag转换、标点符号正则化、不同的空格（\u3000等）
+
+#### Data Filter
+
+VolcTrans没有提到过滤具体的过滤策略，其它都有提及。比较常用的方法：
+- 去掉太长的句子（超过100~140个token）
+- 去掉包含长word的句子（单个word长度大于40不等）
+- source和target长度比例控制在1:3~3:1之间
+- fast align
+
+个别论文使用的方法：
+- 语言检测（fastText）
+- LM score
+- character-word ratio >1.5 <12
+- edit distance
+
+#### Data Sharding
+
+多样性对Ensemble来说至关重要，除了模型的多样性，数据多样性得到了3篇论文的提及（VolcTrans/WeChat/DiDi）。总的来说，在整个机器翻译流程中，可以从3个角度引入数据多样性。
+第一是对原始训练数据引入多样性，一般来说是采样（VolcTrans，对全量数据进行放回采样，比例为100%、110%、120%）或者分片（微信，分成3部分）；第二是对BT使用的单语数据进行引入多样性，通常可以直接分片，然后用于生成BT数据（VolcTrans）或者训练LM等无监督模型（DiDi）；
+第三是对训练数据引入噪声，例如对source端数据进行增删改（微信）、在BT模型生成source数据时使用采样代替beam search（微信）
+
+### Procedures
+
+常规的训练步骤可以分为以下几步：
+1. data preprocess/filter/sharding
+2. train baselines
+3. **out-of-domain methods**: BT, KD with(out) ensemble
+4. **in-domain methods**: finetune, iterative joint training, etc
+5. other methods
+6. ensemble multi models
+7. reranking
+
+BT和KD作为简单有效的做法， 已经得到公认（除了Tencent，他们的BT策略在中英双向翻译上没有提升，因此放弃，但在英德上使用了BT）。
+比赛的测试集newstest是新闻领域的语料，与训练集存在领域差异。因此，所有论文都使用以前的WMT测试集作为in-domain语料，对模型的领域适应性进行调整。
+调整方法包括直接finetune、结合BT or KD一起训练、使用基于in-domain语料的分类器/LM来对平行语料进行过滤等。
+大多数论文都使用了迭代式的训练方法（除了Tencent），区别在于是在out-of-domain阶段对BT/KD使用，还是在in-domain阶段。
+
+比较值得注意的是，之前我并没有想明白单模型如何进行KD，后来DiDi给出了答案：对于每一个单模型，使用其它模型的ensemble作为teacher。
+
+总结下来，BT、KD、in-domain finetune是比较公认和值得尝试的做法，迭代式训练方法可以视模型效果和资源决定。
+
+#### Out-of-domain methods
+
+Out-of-domain
 ## VolcTrans
 
 ### Overview: **Universal** methods for all translation model
