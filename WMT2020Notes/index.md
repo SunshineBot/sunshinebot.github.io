@@ -108,7 +108,7 @@ VolcTrans原话大致是不在乎单个模型效果的好坏，更关注模型�
 
 预处理流程上，BPE和truecase基本成为标配。
 英文tokenizer均使用了Moses，中文分词各家不同，VolcTrans和Tencent使用了jieba，OPPO使用了pkuseg，WeChat、DiDi都使用了自研的分词工具。
-其它预处理包括全半角转换、Unicode字符转换、HTML tag转换、标点符号正则化、不同的空格（\u3000等）
+其它预处理包括全半角转换、Unicode字符转换、HTML tag转换、标点符号正则化、不同的空格（例如\u3000, \x0a）等
 
 #### Data Filter
 
