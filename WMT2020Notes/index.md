@@ -170,6 +170,8 @@ VolcTrans最终的submission还加入了WMT19）。
 
 ## VolcTrans
 
+### Overview: **Universal** methods for all translation model
+
 |Direction|En->Zh|
 |---|---|
 |Testset|WMT19|
@@ -177,8 +179,6 @@ VolcTrans最终的submission还加入了WMT19）。
 |iterative BT|38.9|
 |Ensemble KD|41.5|
 |Ensemble System|42.0|
-
-### Overview: **Universal** methods for all translation model
 
 ### Multi Models
 - Transformer 15e6d(deeper transformer)
@@ -222,7 +222,6 @@ VolcTrans最终的submission还加入了WMT19）。
     - Final: ensemble 9 models.
 
 ## WeChat
-
 
 ### Overveiw: Push single model to best **in-domain performance**
 
@@ -278,6 +277,19 @@ VolcTrans最终的submission还加入了WMT19）。
 
 ### Overview
 
+
+|DiDi Zh-En|newstest19|
+|---|---|
+|baseline|26.19|
+|+ data augmentation|27.45|
+|+ In-domain data finetuning|37.23|
+|+ model ensemble|37.64|
+|+ domain style weighted|38.59
+|+ reranking|38.99|
+
+
+对于每个模型更详细的结果，可以看newstest2018上的测试结果：
+
 | |Transformer Big|Transformer with relative position attention|Transformer with larger FFN size|Transformer with reversed source|
 |---|---|---|---|---|
 |baseline|26.01|26.23|26.12|26.08|
@@ -330,12 +342,26 @@ VolcTrans最终的submission还加入了WMT19）。
     - k-best MIRA
     - features: Length Feature(between src and hyp)/NMT Feature(score of NMT)/LM Features(scores of LM)
 
-### Results
-
-
 ## Tencent
 
 ### Overview: **BEST** zh-en Baselines
+
+|En-Zh|DEEP|BIGDEEP|LARGER|
+|---|---|---|---
+|Baseline|38.10|38.63|38.90|
+|+R2L|39.09|39.01|39.31|
+|+Finetuning|-|40.72|40.68|
+|Ensemble|41.46|
+|ITE|42.26|
+
+|Zh-En|DEEP|HYBRID|BIGDEEP|LARGER|
+|---|---|---|---|---
+|Baseline|29.01|-|-|-|
+|+R2L|31.46|31.42|32.07|32.41|
+|+Finetuning|36.04|-|-|-|
+|+Finetuning(boost)|37.02|37.23|37.38|37.62|
+|Ensemble|38.68|
+|ITE|38.99|
 
 ### Multi Models(both use pre-norm)
 - Deep Transformer: 40e(base)
@@ -365,11 +391,28 @@ VolcTrans最终的submission还加入了WMT19）。
     - Greedy based ensemble: get 4 best single models, add other model which can benefit the translation performance
     - Iterative Transductive Ensemble: translate ensembly def/test set to get pesudo data and finetune model on it, iteratively
 
-### Results
-
 ## OPPO
 
 ### Overview
+
+|En-Zh System|BLEU|Improvement|
+|---|---|---|
+|Baseline|38.6|/|
+|+ Backtranslation (A)|39.1|+0.5/+0.5|
+|&nbsp;&nbsp;&nbsp;+ Finetuned by parallel corpus|40.6|+2.0/+1.5|
+|&nbsp;&nbsp;&nbsp;+ Finetuned by newstest2017|41.3|+2.7/+0.7|
+|+ Forward translation (B)|41.9|+3.3/+2.8|
+|+ Ensemble|42.7|+4.1/+0.8|
+|+ Reranking|43.2|+4.6/+0.5|
+
+|Zh-En System|BLEU|Improvement|
+|---|---|---|
+|Baseline|28.8|/|
+|+ Backtranslation|29.8|+1.0/+1.0|
+|+ Forwardtranslation|34.5|+5.7/+4.7|
+|+ Entity substitution|35.2|+6.4/+0.7|
+|+ Finetuned by newstest2017|36.7|+7.9/+1.5|
+|+ Ensemble & reranking|38.3|+9.5/+1.6|
 
 ### Model: Transformer Big
 
@@ -394,11 +437,5 @@ VolcTrans最终的submission还加入了WMT19）。
     - get entity mapping with Standford NLP NER tools
     - replace the entity with <tag1>, <tag2>, etc and recover it with post-edit.
 
-### Results
 
-## Summary
-- BT: promote data diversity
-    - split data into different shards
-
-
-Back to [Index](../index).
+Back to [Blog Index](../index)
