@@ -228,7 +228,6 @@ VolcTrans最终的submission还加入了WMT19）。
 
 ![Architecture](./wechat-overview.png)
 
-上图是微信翻译参加WMT2020的模型整体架构，详细结果如下：
 
 |SETTINGS|DEEPER|WIDER|AVEATT|DTMT|
 |---|---|---|---|---|
