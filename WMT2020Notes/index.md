@@ -90,7 +90,7 @@ WMT的想法是，现有的翻译模型和评价指标(BLEU)在面对Native->Tra
 其它用到的一些模型：
 
 - transformer 128hdim/256hdim(VolcTrans): 增加了Multi-head Attention中单个Head的维度
-- DLCL 25layers(VolcTrans): 小牛翻译在WMT19提出的模型的改进版
+- DLCL 25layers(VolcTrans): ACL2019的一篇论文，对encoder的层进行线性组合，让高层可以直接使用低层信息
 - Dynamic Conv 7e6d/25e6d(VolcTrans): 卷积网络
 - Average Attention Transformer(WeChat): 将Decoder中的self-attention替换为对embedding的Average操作，略微降低效果的情况下加快推断
 - DTMT(WeChat): RNN-based NMT Model
@@ -435,7 +435,7 @@ VolcTrans最终的submission还加入了WMT19）。
     - LM socrer(LM)
 - Entity substitution
     - get entity mapping with Standford NLP NER tools
-    - replace the entity with <tag1>, <tag2>, etc and recover it with post-edit.
+    - replace the entity with \<tag1>, \<tag2>, etc and recover it with post-edit.
 
 
 Back to [Blog Index](../index)
