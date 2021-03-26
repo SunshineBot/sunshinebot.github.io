@@ -1,6 +1,6 @@
 # Abstractive Text Summarization: A Survey from 2015 to 2018
 
-这是研究生阶段时写下的博客，当初计划在生成式文本摘要方向做一些科研内容，收集了近3年发表在各大会议上的论文（主要包括ACL/EMNLP/NAACL/COLING/CoNLL等，以及一些通用AI会议AAAI/IJCAI等），当时该方向还没有较好的综述，因此直接从论文看起。原文发表在 https://www.cnblogs.com/dtblog/p/9365601.html ，这里是转移过来的副本。
+这是研究生阶段时写下的博客，当初计划在生成式文本摘要方向做一些科研内容，收集了近3年发表在各大会议上的论文（主要包括ACL/EMNLP/NAACL/COLING/CoNLL等，以及一些通用AI会议AAAI/IJCAI等），当时该方向还没有较好的综述，因此直接从论文看起。原文发表在[博客园](https://www.cnblogs.com/dtblog/p/9365601.html)，这里是副本。
 
 ## Sequence-to-sequence Framework
 
