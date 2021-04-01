@@ -4,7 +4,11 @@
 
 Notes of Chinese-English Translation in WMT2020, containing the submission from VolcTrans, WeChat, DiDi, Tencent and OPPO.
 
-## [ULMFiT Note](ULMFiT/)
+## [Paper Note: Mask Predict & JM-NAT](MaskPredict+JM/)
+
+论文笔记：两篇基于Transformer的非自回归翻译模型的论文。
+
+## [Paper Note: ULMFiT](ULMFiT/)
 
 论文笔记：Universal Language Model Fine-tuning for Text Classification (ACL2018)
 
