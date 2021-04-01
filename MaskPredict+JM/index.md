@@ -71,3 +71,6 @@
 ### 实验结果
 
 ![Result](./jm-result.png)
+
+
+Back to [Blog Index](../index)
