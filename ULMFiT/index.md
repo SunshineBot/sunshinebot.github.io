@@ -72,3 +72,7 @@ Jeremy Howard, Sebastian Ruder
 ![](https://img2018.cnblogs.com/blog/584241/201903/584241-20190304160053614-296021267.png)
 
 *思考*: STLR和warm-up的异同？
+
+
+
+Back to [Blog Index](../index)
